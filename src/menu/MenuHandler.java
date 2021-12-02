@@ -1,14 +1,10 @@
 package menu;
-
-
-import com.sun.tools.javac.Main;
 import db.DatabaseArtist;
-
 import java.sql.SQLException;
 import java.util.Scanner;
 
 public class MenuHandler {
-     Scanner scanner = new Scanner(System.in);
+    Scanner scanner = new Scanner(System.in);
     DatabaseArtist databaseArtist = new DatabaseArtist();
 
     public void menuPrinter() {
@@ -21,25 +17,20 @@ public class MenuHandler {
     }
 
     public void menuPicker() throws SQLException {
-
-        String choice;
         boolean flag = true;
         while (flag) {
             menuPrinter();
-            choice = scanner.nextLine();
+            String choice = scanner.nextLine();
             switch (choice) {
                 case "0" -> {
-                    System.out.println("Ending program");
+                    System.out.println("Ending program....");
                     flag = false;
                 }
                 case "1" -> databaseArtist.addArtist();
                 case "2" -> databaseArtist.deleteFromArtist();
                 case "3" -> databaseArtist.updateArtist();
                 case "4" -> databaseArtist.showAllInArtist();
-                case "5" -> {
-                    findArtistMenu();
-                    findArtist();
-                }
+                case "5" -> findArtist();
                 default -> System.out.println("Invalid choice, try again");
             }
         }
@@ -47,8 +38,10 @@ public class MenuHandler {
 
     private void findArtist() throws SQLException {
         boolean flag = true;
-        String choice = scanner.nextLine();
-        while(flag){
+        String choice;
+        while (flag) {
+            findArtistMenu();
+            choice = scanner.nextLine();
             switch (choice) {
                 case "0" -> flag = false;
                 case "1" -> databaseArtist.findById();
@@ -59,11 +52,12 @@ public class MenuHandler {
         }
     }
 
-    private void findArtistMenu(){
-        System.out.println("0. Return");
-        System.out.println("1. Find artist by ID");
-        System.out.println("2. Find artist by age");
-        System.out.println("3. Find artist by name");
+    private void findArtistMenu() {
+        System.out.println("""
+                
+                0. Return
+                1. Find artist by ID
+                2. Find artist by age
+                3. Find artist by name""");
     }
-
 }

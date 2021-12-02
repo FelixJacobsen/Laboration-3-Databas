@@ -8,6 +8,7 @@ public class DatabaseArtist {
     private static Connection connection;
     private static Statement statement;
     private static final Scanner scanner = new Scanner(System.in);
+
     static {
         try {
             connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/laboration3", "root", "123");
@@ -31,21 +32,19 @@ public class DatabaseArtist {
         }
     }
 
-
     public void deleteFromArtist() throws SQLException {
         ResultSet resultSet;
         statement = connection.createStatement();
-
         try {
             resultSet = statement.executeQuery("SELECT * FROM artist");
             while (resultSet.next()) {
-                System.out.println(resultSet.getString("id") + " " + resultSet.getString("first_name") + " " + resultSet.getString("last_name") + " " + resultSet.getInt("age"));
+                printResultset(resultSet);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         System.out.println("Enter ID of the artist you want to remove");
-        int id = scanner.nextInt();
+        int id = Integer.parseInt(scanner.nextLine());
         PreparedStatement preparedStatement;
         try {
             preparedStatement = connection.prepareStatement("DELETE FROM artist WHERE id = ?");
@@ -63,7 +62,7 @@ public class DatabaseArtist {
         ResultSet resultSet = statement.executeQuery("SELECT * FROM artist");
 
         while (resultSet.next()) {
-           printResultset(resultSet);
+            printResultset(resultSet);
         }
         System.out.println("======================================================");
     }
@@ -75,65 +74,94 @@ public class DatabaseArtist {
         System.out.println("Enter last name: ");
         String lastName = scanner.nextLine();
         System.out.println("Enter age: ");
-        int age = scanner.nextInt();
-
-        try{
-            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO artist(first_name, last_name,age) VALUES(?,?,?)" );
+        int age = Integer.parseInt(scanner.nextLine());
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO artist(first_name, last_name,age) VALUES(?,?,?)");
             preparedStatement.setString(1, firstName);
             preparedStatement.setString(2, lastName);
             preparedStatement.setInt(3, age);
             preparedStatement.executeUpdate();
             System.out.println("Artist added successfully");
 
-        }catch (Exception e){
-
+        } catch (Exception ignored) {
         }
         System.out.println("=================================");
-
     }
 
     public void updateArtist() throws SQLException {
+        int artistID;
+        boolean flag;
+        showAllInArtist();
+
+        do {
+            System.out.println("Enter the id of the actor you want to update ");
+            artistID = Integer.parseInt(scanner.nextLine());
+            try {
+                findById(artistID);
+                flag = false;
+            } catch (Exception e) {
+                System.out.println("Artist not found try again");
+                flag = true;
+            }
+        } while (flag);
+
         System.out.println("Enter first name: ");
         String firstName = scanner.nextLine();
+
         System.out.println("Enter last name: ");
         String lastName = scanner.nextLine();
-        System.out.println("Enter age: ");
-        int age = scanner.nextInt();
-            PreparedStatement preparedStatement = connection.prepareStatement("UPDATE artist SET first_name = ?, last_name = ?,age = ? ");
-            preparedStatement.setString(1,firstName);
-            preparedStatement.setString(2, lastName);
-            preparedStatement.setInt(3,age);
-            preparedStatement.executeUpdate();
-        System.out.println("Artist updated");
 
+        System.out.println("Enter age: ");
+        int age = Integer.parseInt(scanner.nextLine());
+        PreparedStatement preparedStatement;
+        try {
+            preparedStatement = connection.prepareStatement("UPDATE artist SET first_name = ?, last_name = ?,age = ? WHERE id = ?");
+            preparedStatement.setString(1, firstName);
+            preparedStatement.setString(2, lastName);
+            preparedStatement.setInt(3, age);
+            preparedStatement.setInt(4,artistID);
+            preparedStatement.executeUpdate();
+            System.out.println("Artist updated");
+        } catch (Exception e) {
+            System.out.println("Artist not found");
+        }
     }
+
+    public void findById(int artistID) throws SQLException {
+        PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM artist WHERE id = ?");
+        preparedStatement.setInt(1, artistID);
+        ResultSet resultSet = preparedStatement.executeQuery();
+
+        if (!resultSet.next())
+            throw new SQLException();
+    }
+
+
     public void findById() throws SQLException {
         System.out.println("Enter the ID of the artist you're searching for:");
-        int searchedId = scanner.nextInt();
+        int searchedId = Integer.parseInt(scanner.nextLine());
 
         String selectByID = "SELECT * FROM artist WHERE id = ?";
         PreparedStatement preparedStatement = connection.prepareStatement(selectByID);
-        preparedStatement.setInt(1,searchedId);
+        preparedStatement.setInt(1, searchedId);
         ResultSet resultSet = preparedStatement.executeQuery();
-        while(resultSet.next()){
+
+        while (resultSet.next()) {
             printResultset(resultSet);
         }
     }
 
     public void findByAge() throws SQLException {
         System.out.println("Enter age of the artist you are searching for: ");
-        int searchedAge = scanner.nextInt();
-
+        int searchedAge = Integer.parseInt(scanner.nextLine());
         String selectedByAge = "SELECT * FROM artist WHERE age = ?";
         PreparedStatement preparedStatement = connection.prepareStatement(selectedByAge);
-        preparedStatement.setInt(1,searchedAge);
+        preparedStatement.setInt(1, searchedAge);
         ResultSet resultSet = preparedStatement.executeQuery();
-        while(resultSet.next()){
+        while (resultSet.next()) {
             printResultset(resultSet);
         }
-
     }
-
 
 
     public void findByName() throws SQLException {
@@ -142,10 +170,10 @@ public class DatabaseArtist {
 
         String selectedByName = "SELECT * FROM artist WHERE first_name = ?";
         PreparedStatement preparedStatement = connection.prepareStatement(selectedByName);
-        preparedStatement.setString(1,searchedName);
+        preparedStatement.setString(1, searchedName);
         ResultSet resultSet = preparedStatement.executeQuery();
         System.out.println("========== Artists found ==========");
-        while(resultSet.next()){
+        while (resultSet.next()) {
             printResultset(resultSet);
         }
         System.out.println("===================================");
@@ -155,10 +183,4 @@ public class DatabaseArtist {
         System.out.println("Artist ID:" + resultSet.getString("id") + " Name:" + "    " + resultSet.getString("first_name")
                 + " " + resultSet.getString("last_name") + "    " + "with age: " + resultSet.getInt("age"));
     }
-
-
-
-
-
-
 }
