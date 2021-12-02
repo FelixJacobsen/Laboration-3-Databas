@@ -32,9 +32,14 @@ public class DatabaseArtist {
         }
     }
 
+
+
     public void deleteFromArtist() throws SQLException {
-        ResultSet resultSet;
         statement = connection.createStatement();
+        ResultSet resultSet;
+        boolean flag;
+        int id;
+
         try {
             resultSet = statement.executeQuery("SELECT * FROM artist");
             while (resultSet.next()) {
@@ -43,17 +48,28 @@ public class DatabaseArtist {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        System.out.println("Enter ID of the artist you want to remove");
-        int id = Integer.parseInt(scanner.nextLine());
+
+        do{
+            System.out.println("Enter ID of the artist you want to remove");
+             id = Integer.parseInt(scanner.nextLine());
+            try{
+                findById(id);
+                flag = false;
+            }catch (SQLException e){
+                System.out.println("Artist not found");
+                flag = true;
+            }
+        }while(flag);
         PreparedStatement preparedStatement;
         try {
             preparedStatement = connection.prepareStatement("DELETE FROM artist WHERE id = ?");
             preparedStatement.setInt(1, id);
             preparedStatement.executeUpdate();
-            System.out.println("Artist removed");
+
         } catch (SQLException e) {
             System.out.println("Artist with that ID not found");
         }
+        System.out.println("Artist removed");
         System.out.println("=================================");
     }
 
@@ -138,7 +154,7 @@ public class DatabaseArtist {
 
 
     public void findById() throws SQLException {
-        System.out.println("Enter the ID of the artist you're searching for:");
+        System.out.println("Enter the ID of the artist you're searching :");
         int searchedId = Integer.parseInt(scanner.nextLine());
 
         String selectByID = "SELECT * FROM artist WHERE id = ?";
